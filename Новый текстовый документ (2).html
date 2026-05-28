@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>База игр | Игровой каталог</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', 'Roboto', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(145deg, #0b0f1c 0%, #0a0e1a 100%);
+            color: #eef2ff;
+            padding: 2rem 1.5rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2.7rem;
+            background: linear-gradient(135deg, #c084fc, #60a5fa);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            color: #8b9bcf;
+            margin-top: 0.5rem;
+        }
+
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+            background: #11161fcc;
+            backdrop-filter: blur(4px);
+            padding: 1rem 1.5rem;
+            border-radius: 2rem;
+            border: 1px solid #2d3a4e;
+        }
+
+        .search-box {
+            flex: 2;
+            min-width: 200px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.8rem 1.2rem;
+            border-radius: 2rem;
+            border: none;
+            background: #1e2538;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        .search-box input:focus {
+            background: #2a334a;
+            box-shadow: 0 0 0 2px #3b4b6e;
+            outline: none;
+        }
+
+        .genre-filter {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .stats {
+            font-size: 0.9rem;
+            background: #0f1420;
+            padding: 0.4rem 1rem;
+            border-radius: 2rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1.8rem;
+            margin-top: 1rem;
+        }
+
+        /* ПЛАВНАЯ АНИМАЦИЯ ДЛЯ КАРТОЧЕК */
+        .game-card {
+            background: #11161f;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #252e3f;
+            backdrop-filter: blur(2px);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: cardAppear 0.4s ease forwards;
+        }
+
+        .game-card:nth-child(1) { animation-delay: 0.00s; }
+        .game-card:nth-child(2) { animation-delay: 0.05s; }
+        .game-card:nth-child(3) { animation-delay: 0.10s; }
+        .game-card:nth-child(4) { animation-delay: 0.15s; }
+        .game-card:nth-child(5) { animation-delay: 0.20s; }
+        .game-card:nth-child(6) { animation-delay: 0.25s; }
+        .game-card:nth-child(7) { animation-delay: 0.30s; }
+        .game-card:nth-child(8) { animation-delay: 0.35s; }
+        .game-card:nth-child(9) { animation-delay: 0.40s; }
+        .game-card:nth-child(10) { animation-delay: 0.45s; }
+        .game-card:nth-child(11) { animation-delay: 0.50s; }
+        .game-card:nth-child(12) { animation-delay: 0.55s; }
+        .game-card:nth-child(13) { animation-delay: 0.60s; }
+        .game-card:nth-child(14) { animation-delay: 0.65s; }
+        .game-card:nth-child(15) { animation-delay: 0.70s; }
+        .game-card:nth-child(16) { animation-delay: 0.75s; }
+        .game-card:nth-child(17) { animation-delay: 0.80s; }
+        .game-card:nth-child(18) { animation-delay: 0.85s; }
+        .game-card:nth-child(19) { animation-delay: 0.90s; }
+        .game-card:nth-child(20) { animation-delay: 0.95s; }
+
+        @keyframes cardAppear {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .game-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 30px -12px rgba(0, 0, 0, 0.5);
+            border-color: #4b6e9e;
+        }
+
+        .game-img {
+            height: 160px;
+            background: #1f2a3c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: #9bb5e6;
+            flex-direction: column;
+        }
+
+        .game-info {
+            padding: 1.2rem 1rem 1.4rem;
+            flex: 1;
+        }
+
+        .game-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+            letter-spacing: -0.3px;
+        }
+
+        .game-genre {
+            display: inline-block;
+            background: #1f2b3e;
+            padding: 0.2rem 0.7rem;
+            border-radius: 1rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #b9d0ff;
+            margin: 0.5rem 0 0.6rem;
+        }
+
+        .game-desc {
+            font-size: 0.85rem;
+            color: #b9c3e2;
+            line-height: 1.4;
+            margin-bottom: 0.8rem;
+        }
+
+        .game-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #7f8db0;
+            border-top: 1px solid #232b3c;
+            padding-top: 0.7rem;
+            margin-top: auto;
+        }
+
+        .rating {
+            color: #facc15;
+            font-weight: bold;
+        }
+
+        .no-results {
+            text-align: center;
+            grid-column: 1 / -1;
+            padding: 3rem;
+            background: #0f1420aa;
+            border-radius: 2rem;
+            font-size: 1.2rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Стили для пагинации */
+        #pagination button:hover:not(:disabled) {
+            background: #2a334a;
+            border-color: #60a5fa;
+        }
+
+        #pagination button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .page-btn {
+            padding: 0.5rem 0.9rem;
+            background: #1e2538;
+            border: 1px solid #2d3a4e;
+            border-radius: 0.5rem;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .page-btn:hover {
+            background: #2a334a;
+            border-color: #60a5fa;
+        }
+
+        .page-btn.active {
+            background: #60a5fa;
+            border-color: #60a5fa;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <button id="restartQuizBtn" style="
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #c084fc, #60a5fa);
+        border: none;
+        font-size: 1.8rem;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(96, 165, 250, 0.4);
+        transition: transform 0.2s, box-shadow 0.2s;
+        z-index: 1500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    ">
+        🎯
+    </button>
+    
+    <div class="header">
+        <h1>🎮 Игровая база</h1>
+        <p>каталог игр с квиз-рекомендателем</p>
+    </div>
+
+    <div class="filters">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="🔍 Поиск по названию...">
+        </div>
+        <div class="genre-filter">
+            <button id="openGenreBtn" style="
+                width: 100%;
+                padding: 0.8rem 1.2rem;
+                border-radius: 2rem;
+                background: #1e2538;
+                border: 1px solid #2d3a4e;
+                color: white;
+                font-size: 1rem;
+                cursor: pointer;
+                text-align: left;
+                transition: 0.2s;
+            ">
+                🎲 Все жанры
+            </button>
+        </div>
+        <div class="stats" id="statsDisplay">📊 игр: 0</div>
+    </div>
+
+    <div class="games-grid" id="gamesGrid"></div>
+
+    <div id="pagination" style="
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 2.5rem;
+        flex-wrap: wrap;
+    ">
+        <button id="prevPageBtn" style="
+            padding: 0.5rem 1rem;
+            background: #1e2538;
+            border: 1px solid #2d3a4e;
+            border-radius: 0.5rem;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+        " disabled>◀ Назад</button>
+        <div id="pageNumbers" style="display: flex; gap: 0.4rem; flex-wrap: wrap;"></div>
+        <button id="nextPageBtn" style="
+            padding: 0.5rem 1rem;
+            background: #1e2538;
+            border: 1px solid #2d3a4e;
+            border-radius: 0.5rem;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+        ">Вперёд ▶</button>
+    </div>
+</div>
+
+<div id="genreModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 2000; justify-content: center; align-items: center;">
+    <div style="background: #11161f; max-width: 400px; width: 90%; border-radius: 2rem; padding: 2rem; border: 1px solid #4b6e9e; transform: scale(0.95); transition: transform 0.2s ease, opacity 0.2s ease;">
+        <h2 style="text-align: center; margin-bottom: 1.5rem;">🎲 Выберите жанр</h2>
+        <div id="genreOptionsList" style="display: flex; flex-direction: column; gap: 0.8rem;"></div>
+        <button id="closeGenreModal" style="margin-top: 1.5rem; width: 100%; padding: 0.6rem; background: none; border: 1px solid #4b6e9e; border-radius: 1rem; color: #9bb5e6; cursor: pointer; transition: 0.2s;">Закрыть</button>
+    </div>
+</div>
+
+<div id="gameModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 1000; justify-content: center; align-items: center;">
+    <div style="background: #11161f; max-width: 500px; width: 90%; border-radius: 2rem; padding: 2rem; border: 1px solid #4b6e9e; position: relative; box-shadow: 0 25px 40px rgba(0,0,0,0.5); transform: scale(0.95); transition: transform 0.2s ease, opacity 0.2s ease;">
+        <button id="closeModalBtn" style="position: absolute; top: 1rem; right: 1.5rem; background: none; border: none; font-size: 2rem; cursor: pointer; color: #9bb5e6; transition: 0.2s;">&times;</button>
+        <div id="modalContent"></div>
+    </div>
+</div>
+
+<div id="quizModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); backdrop-filter: blur(8px); z-index: 2000; justify-content: center; align-items: center;">
+    <div style="background: #11161f; max-width: 550px; width: 90%; border-radius: 2rem; padding: 2rem; border: 1px solid #4b6e9e; max-height: 90vh; overflow-y: auto; transform: scale(0.95); transition: transform 0.2s ease, opacity 0.2s ease;">
+        <div id="quizContent"></div>
+    </div>
+</div>
+
+<script>
+    // ---------- БАЗА ДАННЫХ ИГР ----------
+    const gamesDatabase = [
+        { id: 1, title: "Elden Ring", genre: "RPG", rating: 9.6, year: 2022, desc: "Открытый мир, эпические сражения и глубочайший лор от FromSoftware.", icon: "⚔️" },
+        { id: 2, title: "The Witcher 3", genre: "RPG", rating: 9.8, year: 2015, desc: "Мрачное фэнтези, монстры и захватывающий сюжет о ведьмаке.", icon: "🐺" },
+        { id: 3, title: "Baldur's Gate 3", genre: "RPG", rating: 9.7, year: 2023, desc: "Тактическая RPG по D&D, море свободы и отличный отклик.", icon: "🎲" },
+        { id: 4, title: "Hades", genre: "Indie", rating: 9.4, year: 2020, desc: "Roguelite в сеттинге греческой мифологии, адреналиновый экшен.", icon: "🏺" },
+        { id: 5, title: "Cyberpunk 2077", genre: "RPG", rating: 8.5, year: 2020, desc: "Футуристический Night City, кибер-импланты и свобода.", icon: "🦾" },
+        { id: 6, title: "Red Dead Redemption 2", genre: "Action", rating: 9.7, year: 2018, desc: "Дикий Запад, шедевр повествования и открытый мир.", icon: "🤠" },
+        { id: 7, title: "The Legend of Zelda: Tears of the Kingdom", genre: "Adventure", rating: 9.9, year: 2023, desc: "Инновационное строительство, небо и невероятные приключения.", icon: "🛡️" },
+        { id: 8, title: "Doom Eternal", genre: "Shooter", rating: 9.0, year: 2020, desc: "Бешеный темп, музыка и орды демонов.", icon: "🔫" },
+        { id: 9, title: "Stardew Valley", genre: "Indie", rating: 9.5, year: 2016, desc: "Ферма, соседи, расслабление и уют.", icon: "🌾" },
+        { id: 10, title: "God of War (2018)", genre: "Action", rating: 9.6, year: 2018, desc: "Скандинавская мифология, отец и сын, кинематографичный экшен.", icon: "🪓" },
+        { id: 11, title: "Hollow Knight", genre: "Indie", rating: 9.4, year: 2017, desc: "Атмосферный метроидвания, прекрасный арт и сложность.", icon: "🪲" },
+        { id: 12, title: "Resident Evil 4 Remake", genre: "Action", rating: 9.3, year: 2023, desc: "Современный хоррор-экшен с Леоном и паразитами.", icon: "🧟" },
+        { id: 13, title: "Uncharted 4: Путь вора", genre: "Adventure", rating: 9.3, year: 2016, desc: "Киноприключение, головоломки и погони.", icon: "🏝️" },
+        { id: 14, title: "Forza Horizon 4", genre: "Racing", rating: 8.8, year: 2018, desc: "Гонки с крутой физикой и графикой. Очень много машин.", icon: "🏎️" },
+        { id: 15, title: "Forza Horizon 5", genre: "Racing", rating: 9.1, year: 2021, desc: "Открытый мир Мексики, сотни автомобилей и невероятная физика.", icon: "🏎️💨" },
+        { id: 16, title: "Assassin's Creed 4: Black Flag", genre: "Action", rating: 9.4, year: 2013, desc: "Пираты, корабли, Карибское море и ассасины. Лучшая часть серии по версии многих фанатов.", icon: "🏴‍☠️" },
+        { id: 17, title: "Sons of the Forest", genre: "Action", rating: 8.9, year: 2023, desc: "Хоррор на выживание в лесу с каннибалами и мутантами. Стройте, сражайтесь и пытайтесь выбраться.", icon: "🏝️" },
+        { id: 18, title: "Hitman: World of Assassination", genre: "Action", rating: 9.1, year: 2023, desc: "Песочница для убийств. Сотни способов устранить цели в красивых локациях.", icon: "🔫" },
+        { id: 19, title: "Crossout", genre: "Action", rating: 7.8, year: 2017, desc: "Постапокалиптические бои на самодельных бронеавтомобилях. Строй, разрушай, выживай.", icon: "🚗" },
+        { id: 20, title: "Better Than Dead", genre: "Indie", rating: 7.5, year: 2022, desc: "Инди-экшен про выживание в постапокалипсисе. Быстрое, сложное и динамичное.", icon: "🏃" },
+        { id: 21, title: "Go Wayback", genre: "Adventure", rating: 7.2, year: 2021, desc: "Приключенческая инди-игра с необычным визуальным стилем и атмосферой.", icon: "🛣️" },
+        { id: 22, title: "007 First Light", genre: "Shooter", rating: 7.6, year: 2010, desc: "Шутер про агента 007. Стелс, перестрелки и шпионские гаджеты.", icon: "🎩" },
+        { id: 23, title: "Assassin's Creed 2", genre: "Action", rating: 9.6, year: 2009, desc: "Эцио Аудиторе, Ренессансная Италия и месть. Легендарная игра, которую проходят до сих пор.", icon: "🗡️" },
+        { id: 24, title: "Styx 3", genre: "Action", rating: 8.3, year: 2023, desc: "Стелс-экшен про гоблина-вора. Тьма, ловушки и скрытное прохождение.", icon: "🗡️" },
+        { id: 25, title: "Sleeping Dogs", genre: "Action", rating: 9.0, year: 2012, desc: "Гонконг, триады, кунг-фу и крутой сюжет. Недооценённый шедевр про полицейского под прикрытием.", icon: "🥋" },
+        { id: 26, title: "Horizon Zero Dawn", genre: "Action", rating: 9.2, year: 2017, desc: "Охота на механических динозавров, сильная героиня Элой и шикарный открытый мир.", icon: "🏹" },
+        { id: 27, title: "Super Mario Bros.", genre: "Adventure", rating: 9.8, year: 1985, desc: "Легендарный платформер, с которого началась эра Mario. Спасение принцессы Пич от Боузера.", icon: "🍄" },
+        { id: 28, title: "Tetris", genre: "Puzzle", rating: 9.9, year: 1984, desc: "Вечная головоломка с падающими блоками. Простая, но бесконечно увлекательная.", icon: "🧩" },
+        { id: 29, title: "The Legend of Zelda", genre: "Adventure", rating: 9.7, year: 1986, desc: "Первая игра серии Zelda. Открытый мир, подземелья и меч легенды.", icon: "🗡️" },
+        { id: 30, title: "Pac-Man", genre: "Arcade", rating: 9.5, year: 1980, desc: "Культовый аркадный лабиринт. Поедайте точки и убегайте от призраков.", icon: "👻" },
+        { id: 31, title: "Doom (1993)", genre: "Shooter", rating: 9.7, year: 1993, desc: "Прародитель жанра FPS. Демоны, дробовик и металл.", icon: "🔫" },
+        { id: 32, title: "Space Invaders", genre: "Arcade", rating: 9.3, year: 1978, desc: "Игра, породившая золотую эру аркад. Защищайте Землю от пришельцев.", icon: "👾" },
+        { id: 33, title: "Super Metroid", genre: "Adventure", rating: 9.8, year: 1994, desc: "Шедевр жанра метроидвания. Атмосферное исследование планеты Зебес.", icon: "🪲" },
+        { id: 34, title: "Street Fighter II", genre: "Fighting", rating: 9.6, year: 1991, desc: "Эталонный файтинг, определивший жанр на десятилетия вперёд.", icon: "🥊" },
+        { id: 35, title: "Sonic the Hedgehog", genre: "Platformer", rating: 9.4, year: 1991, desc: "Соник против яичного робота. Скорость, кольца и синий ёж.", icon: "🦔" },
+        { id: 36, title: "Half-Life", genre: "Shooter", rating: 9.8, year: 1998, desc: "Революционный FPS с бесшовным повествованием. Гордон Фримен против резонанса.", icon: "🔧" },
+        { id: 37, title: "StarCraft", genre: "Strategy", rating: 9.8, year: 1998, desc: "Культовая RTS. Терраны, зерги и протоссы в эпичной войне.", icon: "🪖" },
+        { id: 38, title: "Quake", genre: "Shooter", rating: 9.5, year: 1996, desc: "Настоящий 3D-шутер от id Software. Логово демонов и дробовик.", icon: "🔫" },
+        { id: 39, title: "Final Fantasy VI", genre: "RPG", rating: 9.8, year: 1994, desc: "Вершина 16-битных JRPG. Эпичная история магии и империи.", icon: "✨" },
+        { id: 40, title: "Chrono Trigger", genre: "RPG", rating: 9.9, year: 1995, desc: "Одна из величайших JRPG в истории. Путешествия во времени.", icon: "⏰" },
+        { id: 41, title: "Castlevania: Symphony of the Night", genre: "Adventure", rating: 9.8, year: 1997, desc: "Родоначальник жанра метроидвания. Алукард в замке Дракулы.", icon: "🦇" },
+        { id: 42, title: "Metal Gear Solid", genre: "Action", rating: 9.9, year: 1998, desc: "Кинематографичный стелс-экшен. Солид Снейк и металлический рекс.", icon: "📦" },
+        { id: 43, title: "GoldenEye 007", genre: "Shooter", rating: 9.4, year: 1997, desc: "Культовый шутер на N64. Джеймс Бонд и легендарный мультиплеер.", icon: "🔫" },
+        { id: 44, title: "Super Mario 64", genre: "Adventure", rating: 9.9, year: 1996, desc: "Первый 3D-платформер, изменивший всё. Сбор звёзд в замке принцессы.", icon: "🌟" },
+        { id: 45, title: "The Legend of Zelda: Ocarina of Time", genre: "Adventure", rating: 10.0, year: 1998, desc: "Лучшая игра всех времён по версии многих изданий. Мастер меч против Ганнона.", icon: "⚔️" },
+        { id: 46, title: "Pokémon Red/Blue", genre: "RPG", rating: 9.8, year: 1996, desc: "Начало всемирного феномена покемонов. Собери всех!", icon: "⚡" },
+        { id: 47, title: "Halo: Combat Evolved", genre: "Shooter", rating: 9.7, year: 2001, desc: "Флагман Xbox. Мастер Чиф против Ковенанта и Флуда.", icon: "⛑️" },
+        { id: 48, title: "Grand Theft Auto: Vice City", genre: "Action", rating: 9.8, year: 2002, desc: "Стиль 80-х, Томми Версетти и майами-вибрации.", icon: "🌴" },
+        { id: 49, title: "GTA: San Andreas", genre: "Action", rating: 9.9, year: 2004, desc: "Огромный мир, CJ, банды, казино и самолёты-гидры.", icon: "🏙️" },
+        { id: 50, title: "Half-Life 2", genre: "Shooter", rating: 9.9, year: 2004, desc: "Физика, грави-пушка и Гордон Фримен против Альянса.", icon: "🔧" },
+        { id: 51, title: "World of Warcraft", genre: "RPG", rating: 9.8, year: 2004, desc: "Легендарная MMORPG. Азерот, рейды и лор на тысячи часов.", icon: "🌍" },
+        { id: 52, title: "Resident Evil 4 (2005)", genre: "Action", rating: 9.8, year: 2005, desc: "Революция в серии. Леон, испанская деревня и паразиты.", icon: "🧟" },
+        { id: 53, title: "Shadow of the Colossus", genre: "Adventure", rating: 9.9, year: 2005, desc: "Шедевр Фумито Уэда. Охота на шестнадцать колоссов.", icon: "🗿" },
+        { id: 54, title: "God of War (2005)", genre: "Action", rating: 9.6, year: 2005, desc: "Первое приключение Кратоса. Месть богам, экшен и жестокость.", icon: "⚔️" },
+        { id: 55, title: "Call of Duty 4: Modern Warfare", genre: "Shooter", rating: 9.7, year: 2007, desc: "Перезапуск CoD. Лучшая кампания в истории серии.", icon: "🔫" },
+        { id: 56, title: "BioShock", genre: "Shooter", rating: 9.8, year: 2007, desc: "Воут под водой, сюжетный твист и идеология Эндрю Райана.", icon: "⚡" },
+        { id: 57, title: "Mass Effect 2", genre: "RPG", rating: 9.8, year: 2010, desc: "Вторая часть космической оперы. Команда, отношения и выживание.", icon: "🚀" },
+        { id: 58, title: "Fallout 3", genre: "RPG", rating: 9.5, year: 2008, desc: "Постапокалиптическая столица. Мегатонна, анклавы и убежище 101.", icon: "💣" },
+        { id: 59, title: "The Elder Scrolls III: Morrowind", genre: "RPG", rating: 9.7, year: 2002, desc: "Странный мир Данмеров, полная свобода и интриги.", icon: "🏔️" },
+        { id: 60, title: "The Elder Scrolls IV: Oblivion", genre: "RPG", rating: 9.4, year: 2006, desc: "Сиродил, врата Обливиона и Шон Бин в главной роли.", icon: "👑" },
+        { id: 61, title: "Okami", genre: "Adventure", rating: 9.5, year: 2006, desc: "Богиня-волчица Аматерасу раскрашивает мир кистью.", icon: "🐺" },
+        { id: 62, title: "Devil May Cry 3", genre: "Action", rating: 9.6, year: 2005, desc: "Лучшая часть серии. Данте, Вергилий и безумный экшен.", icon: "🗡️" },
+        { id: 63, title: "Kingdom Hearts II", genre: "RPG", rating: 9.3, year: 2005, desc: "Disney + Final Fantasy. Роксас и Сора против бездушных.", icon: "🔑" },
+        { id: 64, title: "Silent Hill 2", genre: "Horror", rating: 9.9, year: 2001, desc: "Психологический хоррор о вине и искуплении. Пирамидоголовый.", icon: "🔺" },
+        { id: 65, title: "Ico", genre: "Adventure", rating: 9.5, year: 2001, desc: "Мальчик и девушка в замке. Взятие за руку и атмосфера.", icon: "🕯️" },
+        { id: 66, title: "Metroid Prime", genre: "Adventure", rating: 9.7, year: 2002, desc: "Переход Metroid в 3D. Исследование Таллон IV.", icon: "🪖" },
+        { id: 67, title: "Braid", genre: "Puzzle", rating: 9.4, year: 2008, desc: "Управление временем и грустная история о девушке.", icon: "⏪" },
+        { id: 68, title: "Limbo", genre: "Puzzle", rating: 9.3, year: 2010, desc: "Монохромный мальчик в мире теней и ловушек.", icon: "🕷️" },
+        { id: 69, title: "Minecraft", genre: "Sandbox", rating: 9.9, year: 2011, desc: "Кубический мир без границ. Строй, добывай, выживай.", icon: "⛏️" },
+        { id: 70, title: "The Walking Dead (Telltale)", genre: "Adventure", rating: 9.6, year: 2012, desc: "Ли и Клементина. Выбор имеет значение.", icon: "🧟" },
+        { id: 71, title: "Journey", genre: "Adventure", rating: 9.8, year: 2012, desc: "Безмолвное путешествие по пескам к горе.", icon: "🧣" },
+        { id: 72, title: "Hotline Miami", genre: "Action", rating: 9.5, year: 2012, desc: "Жестокий топ-даун шутер под электронику.", icon: "🐔" },
+        { id: 73, title: "Fez", genre: "Puzzle", rating: 9.3, year: 2012, desc: "Манипуляции с 2D и 3D. Вращение мира.", icon: "🎩" },
+        { id: 74, title: "Papers, Please", genre: "Simulator", rating: 9.5, year: 2013, desc: "Иммиграционный офицер и моральный выбор.", icon: "📋" },
+        { id: 75, title: "Gone Home", genre: "Adventure", rating: 8.8, year: 2013, desc: "Исследование семейного дома. Находите истории.", icon: "🏠" },
+        { id: 76, title: "Shovel Knight", genre: "Platformer", rating: 9.4, year: 2014, desc: "Ретро-платформер с лопатой.", icon: "🪦" },
+        { id: 77, title: "Undertale", genre: "RPG", rating: 9.7, year: 2015, desc: "Мир, где можно никого не убивать. Санс.", icon: "❤️" },
+        { id: 78, title: "Ori and the Blind Forest", genre: "Platformer", rating: 9.6, year: 2015, desc: "Душевный метроидвания об Ори и Сэйне.", icon: "🌳" },
+        { id: 79, title: "Rocket League", genre: "Racing", rating: 9.4, year: 2015, desc: "Футбол на машинах. Азарт и физика.", icon: "🚗⚽" },
+        { id: 80, title: "The Witness", genre: "Puzzle", rating: 9.2, year: 2016, desc: "Головоломки на острове. Без единого слова.", icon: "🧩" },
+        { id: 81, title: "Inside", genre: "Puzzle", rating: 9.6, year: 2016, desc: "Мрачная версия Limbo. Побег из лаборатории.", icon: "🧒" },
+        { id: 82, title: "Celeste", genre: "Platformer", rating: 9.7, year: 2018, desc: "Точный платформер о депрессии и горе Мадлен.", icon: "🏔️" },
+        { id: 83, title: "Cuphead", genre: "Action", rating: 9.5, year: 2017, desc: "Битвы с боссами в стиле 1930-х. Чашечки против дьявола.", icon: "☕" },
+        { id: 84, title: "Disco Elysium", genre: "RPG", rating: 9.8, year: 2019, desc: "Детектив без боев. Голоса в голове и политика.", icon: "🧥" },
+        { id: 85, title: "Bloodborne", genre: "Action", rating: 9.9, year: 2015, desc: "Лучшая часть Souls от FromSoftware. Готика и ужасы Лавкрафта.", icon: "🩸" },
+        { id: 86, title: "Metal Gear Solid V", genre: "Action", rating: 9.5, year: 2015, desc: "Открытый мир, стелс и безумная механика.", icon: "📦" },
+        { id: 87, title: "Overwatch", genre: "Shooter", rating: 9.2, year: 2016, desc: "Командный геройский шутер от Blizzard.", icon: "👥" },
+        { id: 88, title: "Persona 5", genre: "RPG", rating: 9.7, year: 2016, desc: "Стильная JRPG о подростках-ворах.", icon: "🎭" },
+        { id: 89, title: "The Legend of Zelda: Breath of the Wild", genre: "Adventure", rating: 10.0, year: 2017, desc: "Переосмысление Zelda. Открытый мир без ограничений.", icon: "🏞️" },
+        { id: 90, title: "Super Mario Odyssey", genre: "Platformer", rating: 9.8, year: 2017, desc: "Марио и Кэппи захватывают врагов.", icon: "🎩" },
+        { id: 91, title: "Marvel's Spider-Man", genre: "Action", rating: 9.5, year: 2018, desc: "Паук от Insomniac. Лучшая история Питера Паркера.", icon: "🕷️" },
+        { id: 92, title: "Sekiro: Shadows Die Twice", genre: "Action", rating: 9.6, year: 2019, desc: "Сэмураи, ниндзя, катана и паррирование.", icon: "⚔️" },
+        { id: 93, title: "Outer Wilds", genre: "Adventure", rating: 9.8, year: 2019, desc: "Космический детектив. 22 минуты до смерти солнца.", icon: "🚀" },
+        { id: 94, title: "Control", genre: "Action", rating: 9.2, year: 2019, desc: "Бюро контроля, парапсихология и левитация.", icon: "📂" },
+        { id: 95, title: "Ghost of Tsushima", genre: "Action", rating: 9.6, year: 2020, desc: "Самурайский шедевр от Sucker Punch.", icon: "🗡️" },
+        { id: 96, title: "The Last of Us Part II", genre: "Action", rating: 9.5, year: 2020, desc: "Месть, ненависть и прощение в постапокалипсисе.", icon: "🎸" },
+        { id: 97, title: "Fortnite", genre: "Shooter", rating: 9.0, year: 2017, desc: "Королевская битва со строительством.", icon: "🎮" },
+        { id: 98, title: "Apex Legends", genre: "Shooter", rating: 9.3, year: 2019, desc: "Hero-shooter королевская битва.", icon: "🏆" },
+        { id: 99, title: "Valorant", genre: "Shooter", rating: 9.0, year: 2020, desc: "Тактический шутер от Riot с героями.", icon: "🎯" },
+        { id: 100, title: "Genshin Impact", genre: "RPG", rating: 9.2, year: 2020, desc: "Аниме-RPG открытый мир. Бесплатно.", icon: "🌍" },
+        { id: 101, title: "Call of Duty: Warzone", genre: "Shooter", rating: 8.9, year: 2020, desc: "Battle royale в мире Modern Warfare.", icon: "🎖️" },
+        { id: 102, title: "League of Legends", genre: "Strategy", rating: 9.4, year: 2009, desc: "Главная MOBA мира. ARAM, Ранкед, Worlds.", icon: "🏆" },
+        { id: 103, title: "Dota 2", genre: "Strategy", rating: 9.5, year: 2013, desc: "Сложнейшая MOBA от Valve. The International.", icon: "🌳" },
+        { id: 104, title: "Counter-Strike 2", genre: "Shooter", rating: 9.5, year: 2023, desc: "Переход на Source 2. Тактический шутер.", icon: "🔫" },
+        { id: 105, title: "Team Fortress 2", genre: "Shooter", rating: 9.6, year: 2007, desc: "Классовый шутер с шляпами.", icon: "🎩" },
+        { id: 106, title: "Destiny 2", genre: "Shooter", rating: 9.0, year: 2017, desc: "Шутер с элементами MMO от Bungie.", icon: "🪖" },
+        { id: 107, title: "Warframe", genre: "Action", rating: 9.2, year: 2013, desc: "Космические ниндзя, фарм и паркур.", icon: "👽" },
+        { id: 108, title: "Path of Exile", genre: "RPG", rating: 9.4, year: 2013, desc: "Духовный наследник Diablo. Гигантское древо навыков.", icon: "🌲" },
+        { id: 109, title: "Rainbow Six Siege", genre: "Shooter", rating: 9.3, year: 2015, desc: "Тактический шутер с разрушаемостью.", icon: "🧱" },
+        { id: 110, title: "Among Us", genre: "Party", rating: 8.7, year: 2018, desc: "Социальная дедукция. Найди предателя.", icon: "🕵️" },
+        { id: 111, title: "Fall Guys", genre: "Party", rating: 8.8, year: 2020, desc: "Сумасшедшие гонки с препятствиями.", icon: "🫘" },
+        { id: 112, title: "Fallout: New Vegas", genre: "RPG", rating: 9.8, year: 2010, desc: "Лучшая часть Fallout. Фракции, выбор и вегас.", icon: "🎲" },
+        { id: 113, title: "Dark Souls", genre: "RPG", rating: 9.8, year: 2011, desc: "Рождение жанра souls-like. Анор Лондо.", icon: "🔥" },
+        { id: 114, title: "Dark Souls III", genre: "RPG", rating: 9.7, year: 2016, desc: "Завершение трилогии. Лучший боссфайт.", icon: "🗡️" },
+        { id: 115, title: "Divinity: Original Sin 2", genre: "RPG", rating: 9.8, year: 2017, desc: "Тактическая CRPG. Стихии и свобода.", icon: "🎲" },
+        { id: 116, title: "Monster Hunter: World", genre: "Action", rating: 9.6, year: 2018, desc: "Охота на гигантских монстров в команде.", icon: "🦖" },
+        { id: 117, title: "Xenoblade Chronicles", genre: "RPG", rating: 9.5, year: 2010, desc: "JRPG на гигантских титанах.", icon: "⚔️" },
+        { id: 118, title: "Dragon Age: Origins", genre: "RPG", rating: 9.7, year: 2009, desc: "Тёмное фэнтези от BioWare. Легенда о Серых Стражах.", icon: "🐉" },
+        { id: 119, title: "Kingdom Come: Deliverance", genre: "RPG", rating: 9.0, year: 2018, desc: "Исторический средневековый симулятор.", icon: "⚔️" },
+        { id: 120, title: "Nier: Automata", genre: "RPG", rating: 9.7, year: 2017, desc: "Слёрб мозгов от Йоко Таро. 2B, 9S.", icon: "🤖" },
+        { id: 121, title: "Yakuza 0", genre: "Action", rating: 9.6, year: 2015, desc: "Кирию и Маджима в 80-х Камуротё.", icon: "🐉" },
+        { id: 122, title: "Final Fantasy VII Remake", genre: "RPG", rating: 9.4, year: 2020, desc: "Переосмысление легендарной FFVII.", icon: "🗡️" },
+        { id: 123, title: "Octopath Traveler", genre: "RPG", rating: 9.0, year: 2018, desc: "Восемь историй в HD-2D.", icon: "🎭" },
+        { id: 124, title: "Triangle Strategy", genre: "Strategy", rating: 9.1, year: 2022, desc: "Тактическая RPG. Выбор влияет на сюжет.", icon: "📊" },
+        { id: 125, title: "Age of Empires II", genre: "Strategy", rating: 9.9, year: 1999, desc: "Король RTS. Вольоло.", icon: "🏰" },
+        { id: 126, title: "Civilization VI", genre: "Strategy", rating: 9.3, year: 2016, desc: "Построй империю, которая выдержит испытание временем.", icon: "🌎" },
+        { id: 127, title: "Total War: Warhammer III", genre: "Strategy", rating: 9.2, year: 2022, desc: "Фэнтези-стратегия. Демоны и катастрофы.", icon: "⚔️" },
+        { id: 128, title: "XCOM 2", genre: "Strategy", rating: 9.5, year: 2016, desc: "Тактика, потери, 95% мимо.", icon: "🪖" },
+        { id: 129, title: "Crusader Kings III", genre: "Strategy", rating: 9.6, year: 2020, desc: "Симулятор династии. Интриги, убийства, любовь.", icon: "👑" },
+        { id: 130, title: "Titanfall 2", genre: "Shooter", rating: 9.8, year: 2016, desc: "Лучшая кампания в жанре. BT-7274.", icon: "🤖" },
+        { id: 131, title: "Doom (2016)", genre: "Shooter", rating: 9.6, year: 2016, desc: "Перезапуск. Бешеный темп, металл и демоны.", icon: "🔫" },
+        { id: 132, title: "Wolfenstein: The New Order", genre: "Shooter", rating: 9.3, year: 2014, desc: "Нацисты выиграли войну. Бласкович.", icon: "🔫" },
+        { id: 133, title: "Borderlands 2", genre: "Shooter", rating: 9.5, year: 2012, desc: "Лут-шутер с Хэндсомом Джеком.", icon: "🔫" },
+        { id: 134, title: "Far Cry 3", genre: "Shooter", rating: 9.6, year: 2012, desc: "Ваас. Безумие.", icon: "🏝️" },
+        { id: 135, title: "Prey (2017)", genre: "Shooter", rating: 9.4, year: 2017, desc: "System Shock в космосе.", icon: "👾" },
+        { id: 136, title: "Metro Exodus", genre: "Shooter", rating: 9.3, year: 2019, desc: "Артём выбирается из метро.", icon: "🚇" },
+        { id: 137, title: "Battlefield 4", genre: "Shooter", rating: 9.0, year: 2013, desc: "Левиафан. Разрушаемость и мультиплеер.", icon: "🚁" },
+        { id: 138, title: "Battlefield 1", genre: "Shooter", rating: 9.4, year: 2016, desc: "Первая мировая. Операции.", icon: "🪖" },
+        { id: 139, title: "Tomb Raider (2013)", genre: "Action", rating: 9.4, year: 2013, desc: "Перезапуск Лары Крофт.", icon: "🏹" },
+        { id: 140, title: "Rise of the Tomb Raider", genre: "Action", rating: 9.2, year: 2015, desc: "Сибирь, гробницы и выживание.", icon: "❄️" },
+        { id: 141, title: "Shadow of the Tomb Raider", genre: "Action", rating: 8.9, year: 2018, desc: "Лара становится воином тьмы.", icon: "🏹" },
+        { id: 142, title: "Days Gone", genre: "Action", rating: 8.7, year: 2019, desc: "Байкер против орд фрееков.", icon: "🏍️" },
+        { id: 143, title: "Star Wars Jedi: Fallen Order", genre: "Action", rating: 9.2, year: 2019, desc: "Световой меч и СИЛА.", icon: "✨" },
+        { id: 144, title: "Star Wars Jedi: Survivor", genre: "Action", rating: 9.3, year: 2023, desc: "Кэл Кестис возвращается.", icon: "⚔️" },
+        { id: 145, title: "Batman: Arkham Asylum", genre: "Action", rating: 9.5, year: 2009, desc: "Легендарный боевик про Бэтмена.", icon: "🦇" },
+        { id: 146, title: "Batman: Arkham City", genre: "Action", rating: 9.8, year: 2011, desc: "Открытый мир, лучший джокер.", icon: "🦇" },
+        { id: 147, title: "Middle-earth: Shadow of Mordor", genre: "Action", rating: 9.3, year: 2014, desc: "Система немиесис.", icon: "🗡️" },
+        { id: 148, title: "Mad Max", genre: "Action", rating: 8.5, year: 2015, desc: "Пустошь, машины и магнум опус.", icon: "🚗" },
+        { id: 149, title: "Mafia: Definitive Edition", genre: "Action", rating: 9.0, year: 2020, desc: "Ремейк первой Мафии.", icon: "🚬" },
+        { id: 150, title: "L.A. Noire", genre: "Adventure", rating: 9.2, year: 2011, desc: "Детектив в Лос-Анджелесе 40-х.", icon: "👮" },
+        { id: 151, title: "Super Meat Boy", genre: "Platformer", rating: 9.4, year: 2010, desc: "Точный и жёсткий платформер.", icon: "🥩" },
+        { id: 152, title: "The Binding of Isaac: Rebirth", genre: "Action", rating: 9.6, year: 2014, desc: "Рогалик с тысячами предметов.", icon: "👶" },
+        { id: 153, title: "Dead Cells", genre: "Action", rating: 9.5, year: 2018, desc: "Рогалик-метроидвания.", icon: "⚔️" },
+        { id: 154, title: "Enter the Gungeon", genre: "Shooter", rating: 9.3, year: 2016, desc: "Bullet hell рогалик.", icon: "🔫" },
+        { id: 155, title: "Slay the Spire", genre: "Strategy", rating: 9.6, year: 2019, desc: "Колодостроительный рогалик.", icon: "🃏" },
+        { id: 156, title: "Darkest Dungeon", genre: "Strategy", rating: 9.4, year: 2016, desc: "Безумие, стресс и криты.", icon: "😵" },
+        { id: 157, title: "Return of the Obra Dinn", genre: "Puzzle", rating: 9.7, year: 2018, desc: "Детектив на чёрно-белом корабле.", icon: "⚓" },
+        { id: 158, title: "What Remains of Edith Finch", genre: "Adventure", rating: 9.6, year: 2017, desc: "Интерактивная сказка о семье.", icon: "🏠" },
+        { id: 159, title: "Firewatch", genre: "Adventure", rating: 9.2, year: 2016, desc: "Лесничий и рация.", icon: "🔥" },
+        { id: 160, title: "SOMA", genre: "Horror", rating: 9.4, year: 2015, desc: "Философский хоррор под водой.", icon: "🧠" },
+        { id: 161, title: "Hellblade: Senua's Sacrifice", genre: "Action", rating: 9.3, year: 2017, desc: "Психоз и норвежская мифология.", icon: "🗡️" },
+        { id: 162, title: "Gris", genre: "Adventure", rating: 9.2, year: 2018, desc: "Визуальный шедевр о депрессии.", icon: "🎨" },
+        { id: 163, title: "Spiritfarer", genre: "Adventure", rating: 9.4, year: 2020, desc: "Трогательный менеджер о смерти.", icon: "⛵" },
+        { id: 164, title: "Super Mario Galaxy", genre: "Platformer", rating: 9.9, year: 2007, desc: "3D-платформер в космосе.", icon: "🌌" },
+        { id: 165, title: "Super Mario Galaxy 2", genre: "Platformer", rating: 9.8, year: 2010, desc: "Ещё больше гравитационных уровней.", icon: "⭐" },
+        { id: 166, title: "The Legend of Zelda: Twilight Princess", genre: "Adventure", rating: 9.6, year: 2006, desc: "Мрачный мир тени.", icon: "🐺" },
+        { id: 167, title: "The Legend of Zelda: Wind Waker", genre: "Adventure", rating: 9.7, year: 2002, desc: "Цель-мультяшный стиль и море.", icon: "⛵" },
+        { id: 168, title: "Metroid Dread", genre: "Action", rating: 9.5, year: 2021, desc: "Самус против неубиваемого EMMI.", icon: "🪖" },
+        { id: 169, title: "Fire Emblem: Three Houses", genre: "Strategy", rating: 9.6, year: 2019, desc: "Тактическая RPG с социальной жизнью.", icon: "🗡️" },
+        { id: 170, title: "Animal Crossing: New Horizons", genre: "Simulator", rating: 9.4, year: 2020, desc: "Отдых на острове.", icon: "🏝️" },
+        { id: 171, title: "Splatoon 2", genre: "Shooter", rating: 9.2, year: 2017, desc: "Красочный мультиплеер с краской.", icon: "🦑" },
+        { id: 172, title: "Pikmin 3", genre: "Strategy", rating: 9.1, year: 2013, desc: "Командование пикминами.", icon: "🌱" },
+        { id: 173, title: "Luigi's Mansion 3", genre: "Adventure", rating: 9.3, year: 2019, desc: "Луиджи пылесосит призраков.", icon: "👻" },
+        { id: 174, title: "The Sims 3", genre: "Simulator", rating: 9.4, year: 2009, desc: "Лучшая часть The Sims.", icon: "🏠" },
+        { id: 175, title: "The Sims 4", genre: "Simulator", rating: 8.7, year: 2014, desc: "Симс с современной графикой.", icon: "🏠" },
+        { id: 176, title: "RollerCoaster Tycoon 2", genre: "Simulator", rating: 9.5, year: 2002, desc: "Строй парк аттракционов.", icon: "🎢" },
+        { id: 177, title: "Planet Coaster", genre: "Simulator", rating: 9.4, year: 2016, desc: "Современный симулятор парка.", icon: "🎡" },
+        { id: 178, title: "Planet Zoo", genre: "Simulator", rating: 9.3, year: 2019, desc: "Строй и управляй зоопарком.", icon: "🦁" },
+        { id: 179, title: "Microsoft Flight Simulator", genre: "Simulator", rating: 9.6, year: 2020, desc: "Реалистичный полёт над всей Землёй.", icon: "✈️" },
+        { id: 180, title: "Euro Truck Simulator 2", genre: "Simulator", rating: 9.4, year: 2012, desc: "Релакс-симулятор дальнобойщика.", icon: "🚛" },
+        { id: 181, title: "Factorio", genre: "Strategy", rating: 9.8, year: 2020, desc: "Автоматизация, конвейеры и фабрика.", icon: "⚙️" },
+        { id: 182, title: "RimWorld", genre: "Strategy", rating: 9.7, year: 2018, desc: "Колонисты, органы, войны.", icon: "🌍" },
+        { id: 183, title: "Dwarf Fortress", genre: "Strategy", rating: 9.6, year: 2006, desc: "Самая сложная симуляция дварфов.", icon: "⛏️" },
+        { id: 184, title: "Kerbal Space Program", genre: "Simulator", rating: 9.5, year: 2015, desc: "Строй ракеты и взрывай кербалов.", icon: "🚀" },
+        { id: 185, title: "Transport Fever 2", genre: "Simulator", rating: 9.0, year: 2019, desc: "Транспортная империя.", icon: "🚂" },
+        { id: 186, title: "Forza Motorsport 7", genre: "Racing", rating: 9.1, year: 2017, desc: "Трековые гонки от Microsoft.", icon: "🏎️" },
+        { id: 187, title: "Gran Turismo 4", genre: "Racing", rating: 9.5, year: 2004, desc: "Король симуляторов на PS2.", icon: "🏎️" },
+        { id: 188, title: "Gran Turismo Sport", genre: "Racing", rating: 8.9, year: 2017, desc: "Онлайн-фокус в GT.", icon: "🏁" },
+        { id: 189, title: "Need for Speed: Most Wanted (2005)", genre: "Racing", rating: 9.6, year: 2005, desc: "Лучший NFS.", icon: "🚗" },
+        { id: 190, title: "Need for Speed: Hot Pursuit (2010)", genre: "Racing", rating: 9.2, year: 2010, desc: "Гонки с полицейскими.", icon: "🚔" },
+        { id: 191, title: "Burnout Paradise", genre: "Racing", rating: 9.3, year: 2008, desc: "Разрушения и открытый мир.", icon: "💥" },
+        { id: 192, title: "Dirt Rally 2.0", genre: "Racing", rating: 9.4, year: 2019, desc: "Хардкорный ралли-симулятор.", icon: "🏎️💨" },
+        { id: 193, title: "Amnesia: The Dark Descent", genre: "Horror", rating: 9.3, year: 2010, desc: "Хоррор без оружия. Прячься.", icon: "😨" },
+        { id: 194, title: "Outlast", genre: "Horror", rating: 9.2, year: 2013, desc: "Психиатрическая больница.", icon: "🏥" },
+        { id: 195, title: "Alien: Isolation", genre: "Horror", rating: 9.4, year: 2014, desc: "Ксеноморф. Выживание.", icon: "👽" },
+        { id: 196, title: "S.T.A.L.K.E.R.: Shadow of Chernobyl", genre: "Horror", rating: 9.5, year: 2007, desc: "Зона, аномалии и выживание.", icon: "☢️" },
+        { id: 197, title: "Dead Space", genre: "Horror", rating: 9.6, year: 2008, desc: "Некроморфы на Ishimura.", icon: "🩸" },
+        { id: 198, title: "Dead Space 2", genre: "Horror", rating: 9.4, year: 2011, desc: "Айзек в космическом городе.", icon: "🔫" },
+        { id: 199, title: "Resident Evil 2 Remake", genre: "Horror", rating: 9.7, year: 2019, desc: "Ремейк легендарной второй части.", icon: "🧟" },
+        { id: 200, title: "Resident Evil 7", genre: "Horror", rating: 9.5, year: 2017, desc: "Вид от первого лица.", icon: "🏚️" },
+        { id: 201, title: "The Evil Within", genre: "Horror", rating: 8.9, year: 2014, desc: "Синдзи Миками.", icon: "🩸" },
+        { id: 202, title: "Phasmophobia", genre: "Horror", rating: 9.1, year: 2020, desc: "Охота на призраков в кооперативе.", icon: "🔦" },
+        { id: 203, title: "Super Smash Bros. Melee", genre: "Fighting", rating: 9.8, year: 2001, desc: "Глубочайший файтинг-платформер.", icon: "👊" },
+        { id: 204, title: "Super Smash Bros. Ultimate", genre: "Fighting", rating: 9.7, year: 2018, desc: "Все бойцы в одной игре.", icon: "🎮" },
+        { id: 205, title: "Tekken 3", genre: "Fighting", rating: 9.6, year: 1997, desc: "Легендарный файтинг.", icon: "🥋" },
+        { id: 206, title: "Tekken 7", genre: "Fighting", rating: 9.4, year: 2015, desc: "Современный эталон 3D-файтинга.", icon: "👊" },
+        { id: 207, title: "Mortal Kombat 11", genre: "Fighting", rating: 9.3, year: 2019, desc: "Кровавые фаталити.", icon: "💀" },
+        { id: 208, title: "Guilty Gear Strive", genre: "Fighting", rating: 9.5, year: 2021, desc: "Красивый аниме-файтинг.", icon: "🎸" },
+        { id: 209, title: "Tony Hawk's Pro Skater 2", genre: "Sports", rating: 9.7, year: 2000, desc: "Лучший скейтерский симулятор.", icon: "🛹" },
+        { id: 210, title: "FIFA 17", genre: "Sports", rating: 8.8, year: 2016, desc: "Переход на Frostbite.", icon: "⚽" },
+        { id: 211, title: "Pro Evolution Soccer 6", genre: "Sports", rating: 9.4, year: 2006, desc: "Лучший PES.", icon: "⚽" },
+{ id: 212, title: "Bayonetta 2", genre: "Action", rating: 9.6, year: 2014, desc: "Шедевр экшена от PlatinumGames. Ведьма с ружьями на ногах сражается с ангелами и демонами в безумном стиле.", icon: "👠" },
+// === НОВЫЕ ИГРЫ (ID с 213) ===
+{ id: 213, title: "Heavy Rain", genre: "Adventure", rating: 9.0, year: 2010, desc: "Интерактивный детектив от Quantic Dream. Поиски маньяка-оригамиста через выборы и QTE.", icon: "🌧️" },
+{ id: 214, title: "The Sims 2", genre: "Simulator", rating: 9.3, year: 2004, desc: "Вторая часть симулятора жизни. Управляйте потребностями, карьерой и отношениями симов.", icon: "🏠" },
+{ id: 215, title: "Xenogears", genre: "RPG", rating: 9.5, year: 1998, desc: "Философская JRPG от Square. Мехи, психология и эпичный сюжет на дисках.", icon: "🤖" },
+{ id: 216, title: "Contra", genre: "Arcade", rating: 9.3, year: 1987, desc: "Классическая аркада Konami. Два солдата с бесконечными патронами против пришельцев.", icon: "🔫" },
+{ id: 217, title: "Мор. Утопия", genre: "Adventure", rating: 8.7, year: 2005, desc: "Российская постапокалиптическая адвенчура. Мрачная атмосфера и нелинейный сюжет.", icon: "☣️" },
+{ id: 218, title: "Counter-Strike 1.6", genre: "Shooter", rating: 9.7, year: 2000, desc: "Легендарный тактический шутер. de_dust2, awp и клановые войны.", icon: "🔫" },
+{ id: 219, title: "Red Dead Redemption", genre: "Action", rating: 9.8, year: 2010, desc: "Первая часть приключений Джона Марстона. Дикий Запад, месть и жертва.", icon: "🤠" },
+{ id: 220, title: "Alan Wake", genre: "Action", rating: 9.1, year: 2010, desc: "Психологический триллер от Remedy. Писатель против тьмы с фонариком и револьвером.", icon: "📖" },
+{ id: 221, title: "Counter-Strike: Global Offensive", genre: "Shooter", rating: 9.5, year: 2012, desc: "Основная версия CS до CS2. Ранкед, скины и киберспорт.", icon: "🔫" },
+{ id: 222, title: "Escape from Tarkov", genre: "Shooter", rating: 8.9, year: 2017, desc: "Хардкорный экстракшн-шутер. Реализм, лут, ПВП и ПВЕ в зоне.", icon: "🏃" },
+{ id: 223, title: "Half-Life: Alyx", genre: "Shooter", rating: 9.9, year: 2020, desc: "Шедевр для VR. Приквел Half-Life 2 с потрясающим взаимодействием.", icon: "🥽" },
+{ id: 224, title: "Warcraft III: The Frozen Throne", genre: "Strategy", rating: 9.8, year: 2003, desc: "Дополнение к WC3. Артас становится Королём-личом.", icon: "❄️" },
+{ id: 225, title: "Grand Theft Auto IV", genre: "Action", rating: 9.7, year: 2008, desc: "Нико Беллик в Либерти-Сити. Мрачная история про эмигранта.", icon: "🗽" },
+{ id: 226, title: "Battletoads & Double Dragon", genre: "Arcade", rating: 8.5, year: 1993, desc: "Кроссовер двух серий. Битвы с пришельцами в кооперативе.", icon: "🐸" },
+{ id: 227, title: "Rome: Total War", genre: "Strategy", rating: 9.6, year: 2004, desc: "Первая 3D Total War. Легионы, слоны и битвы на тысячу человек.", icon: "🏛️" },
+{ id: 228, title: "Dishonored", genre: "Action", rating: 9.4, year: 2012, desc: "Стелс-иммерсив от Arkane. Корво, крысы, метка и месть.", icon: "🎭" },
+{ id: 229, title: "The Sims", genre: "Simulator", rating: 9.2, year: 2000, desc: "Первая часть легендарного симулятора жизни.", icon: "🏠" },
+{ id: 230, title: "Final Fantasy IX", genre: "RPG", rating: 9.6, year: 2000, desc: "Возвращение к корням JRPG. Зидан и Гарнет спасают мир.", icon: "⚔️" },
+{ id: 231, title: "Portal", genre: "Puzzle", rating: 9.8, year: 2007, desc: "Головоломка с портальной пушкой. GLaDOS, печеньки и компаньон-куб.", icon: "🌀" },
+{ id: 232, title: "Psychonauts", genre: "Platformer", rating: 9.5, year: 2005, desc: "Платформер по мирам сознания. Раз, культовый юмор.", icon: "🧠" },
+{ id: 233, title: "Diablo", genre: "RPG", rating: 9.7, year: 1996, desc: "Первая часть легендарной серии. Тристрам, фермер и Диабло.", icon: "😈" },
+{ id: 234, title: "Pong", genre: "Arcade", rating: 9.0, year: 1972, desc: "Игра, с которой всё началось. Две ракетки и мяч.", icon: "🎾" },
+{ id: 235, title: "Mass Effect", genre: "RPG", rating: 9.6, year: 2007, desc: "Первая часть космической оперы. Шепард, Нормандия, Жнецы.", icon: "🚀" },
+{ id: 236, title: "StarCraft II: Wings of Liberty", genre: "Strategy", rating: 9.5, year: 2010, desc: "Продолжение легендарной RTS. Джим Рейнор против Менгска.", icon: "🪖" },
+{ id: 237, title: "BioShock Infinite", genre: "Shooter", rating: 9.7, year: 2013, desc: "Плавучий город Колумбия, Букер и Элизабет. Мультивселенная.", icon: "☁️" },
+{ id: 238, title: "The Stanley Parable", genre: "Adventure", rating: 9.5, year: 2013, desc: "Мета-адвенчура о свободе выбора. Офис и диктор.", icon: "🚪" },
+{ id: 239, title: "Gothic II", genre: "RPG", rating: 9.7, year: 2002, desc: "Лучшая часть Gothic. Остров Хоринис, драконы и паладин.", icon: "⚔️" },
+{ id: 240, title: "Grand Theft Auto III", genre: "Action", rating: 9.6, year: 2001, desc: "Переход GTA в 3D. Клод, радиоволны и свобода.", icon: "🏙️" },
+{ id: 241, title: "Resident Evil (1996)", genre: "Horror", rating: 9.5, year: 1996, desc: "Оригинальная игра, родившая жанр survival horror. Особняк, зомби и лиса.", icon: "🏚️" },
+{ id: 242, title: "Sid Meier's Civilization", genre: "Strategy", rating: 9.4, year: 1991, desc: "Первая часть легендарной 4X-стратегии. Построй империю.", icon: "🏛️" },
+{ id: 243, title: "Diablo II", genre: "RPG", rating: 9.9, year: 2000, desc: "Лучшая часть серии. Лагерь разбойниц, Мефисто и Баал.", icon: "😈" },
+{ id: 244, title: "Prey (2017)", genre: "Shooter", rating: 9.4, year: 2017, desc: "Духовный наследник System Shock. Космическая станция, мимики и глю-пушка.", icon: "👾" },
+{ id: 245, title: "Metal Gear Solid 2: Sons of Liberty", genre: "Action", rating: 9.6, year: 2001, desc: "Философский стелс-экшен. Рейден и патриоты.", icon: "📦" },
+{ id: 246, title: "Planescape: Torment", genre: "RPG", rating: 9.9, year: 1999, desc: "Лучший сюжет в истории игр. Безымянный ищет свою смерть.", icon: "📖" },
+{ id: 247, title: "Metal Gear Solid 3: Snake Eater", genre: "Action", rating: 9.9, year: 2004, desc: "Лучшая MGS. Выживание в джунглях, Босс и слёзы.", icon: "🐍" },
+{ id: 248, title: "Thief: The Dark Project", genre: "Action", rating: 9.5, year: 1998, desc: "Прародитель стелс-жанра. Гарретт, тень и воры.", icon: "🎭" },
+{ id: 249, title: "Max Payne", genre: "Shooter", rating: 9.6, year: 2001, desc: "Буллит-тайм и нуар. Макс Пейн мстит за семью.", icon: "🕴️" },
+{ id: 250, title: "Fallout", genre: "RPG", rating: 9.7, year: 1997, desc: "Первая часть постапокалиптической серии. Убежище 13, изолента.", icon: "⚛️" },
+{ id: 251, title: "Uncharted 2: Among Thieves", genre: "Adventure", rating: 9.8, year: 2009, desc: "Лучшая часть Uncharted. Поезд, Шамбала и Лазаревич.", icon: "🏔️" },
+{ id: 252, title: "Warcraft III: Reign of Chaos", genre: "Strategy", rating: 9.8, year: 2002, desc: "Базовая игра WC3. Артас, иллидан и битва за Калимдор.", icon: "⚔️" },
+{ id: 253, title: "Deus Ex", genre: "RPG", rating: 9.9, year: 2000, desc: "Иммерсив-сим о киберпанке. Свобода выбора и заговоры.", icon: "⚡" },
+{ id: 254, title: "The Elder Scrolls V: Skyrim", genre: "RPG", rating: 9.8, year: 2011, desc: "Культовая RPG. Драконы, клинки и бесконечные моды.", icon: "🐉" },
+{ id: 255, title: "Final Fantasy VII", genre: "RPG", rating: 9.8, year: 1997, desc: "Легендарная JRPG. Клауд, Сефирот и метеор.", icon: "⭐" },
+{ id: 256, title: "Portal 2", genre: "Puzzle", rating: 9.9, year: 2011, desc: "Шедевр от Valve. Кооператив, GLaDOS, Кейв Джонсон.", icon: "🌀" },
+{ id: 257, title: "Dark Souls", genre: "RPG", rating: 9.8, year: 2011, desc: "Рождение жанра souls-like. Анор Лондо.", icon: "🔥" },
+{ id: 258, title: "Fallout 2", genre: "RPG", rating: 9.8, year: 1998, desc: "Лучшая классическая Fallout. Черный юмор, свобода и избранный.", icon: "⚛️" },
+{ id: 259, title: "Heroes of Might and Magic III", genre: "Strategy", rating: 9.9, year: 1999, desc: "Лучшая часть HOMM. Замки, артефакты и некрополь.", icon: "🏰" },
+{ id: 260, title: "The Last of Us", genre: "Action", rating: 9.9, year: 2013, desc: "Шедевр Naughty Dog. Джоэл и Элли в постапокалипсисе.", icon: "🏚️" },
+{ id: 261, title: "Deep Rock Galactic", genre: "Shooter", rating: 9.5, year: 2020, desc: "Кооперативный шутер про космических гномов. Рубка руды, убийство жуков и дружелюбное комьюнити.", icon: "⛏️" },
+{ id: 262, title: "Hunt: Showdown", genre: "Shooter", rating: 9.2, year: 2019, desc: "PvPvE хоррор-шутер на выживание в сеттинге Дикого Запада. Охота на монстров и другие банды.", icon: "🤠" },
+{ id: 263, title: "Inscryption", genre: "Horror", rating: 9.6, year: 2021, desc: "Карточный хоррор-рогалик с неожиданными сюрпризами и мета-сюжетом.", icon: "🃏" },
+{ id: 264, title: "It Takes Two", genre: "Platformer", rating: 9.8, year: 2021, desc: "Лучшая кооперативная игра для двоих. Обязательна к прохождению с другом.", icon: "💑" },
+{ id: 265, title: "Grounded", genre: "Adventure", rating: 9.1, year: 2020, desc: "Выживание в мире, где вы уменьшены до размера муравья. Стройте и исследуйте задний двор.", icon: "🐜" },
+{ id: 266, title: "Lethal Company", genre: "Horror", rating: 9.3, year: 2023, desc: "Страшный и смешной хоррор-кооп на 4 игроков. Сбор металлолома на заброшенных лунах.", icon: "🔦" },
+{ id: 267, title: "Warhammer: Vermintide 2", genre: "Action", rating: 9.0, year: 2018, desc: "Left 4 Dead в фэнтези-сеттинге Warhammer с ультимативными атаками и разными классами.", icon: "⚔️" },
+{ id: 268, title: "Risk of Rain 2", genre: "Shooter", rating: 9.5, year: 2019, desc: "3D-roguelite шутер с бесконечным ростом силы и безумным хаосом на экране.", icon: "🌧️" },
+{ id: 269, title: "Neon White", genre: "Action", rating: 9.3, year: 2022, desc: "Карточный пазл + платформер + аниме-визуальная новелла в уникальном стиле.", icon: "⚪" },
+{ id: 270, title: "Viewfinder", genre: "Puzzle", rating: 9.2, year: 2023, desc: "Головоломка, где фотографии становятся реальностью. Играйте с перспективой.", icon: "📷" },
+{ id: 271, title: "Chants of Sennaar", genre: "Puzzle", rating: 9.4, year: 2023, desc: "Вы расшифровываете неизвестные языки, чтобы объединить разделённые народы.", icon: "🔤" },
+{ id: 272, title: "Warframe", genre: "Shooter", rating: 9.2, year: 2013, desc: "Бесплатный шутер про космических ниндзя. Паркур, фарм и огромный выбор оружия.", icon: "👽" },
+{ id: 273, title: "Marvel Snap", genre: "Strategy", rating: 8.9, year: 2022, desc: "Карточная игра на телефоне и ПК. Быстрые партии и прокачка.", icon: "🃏" }
+    ];
+
+    // Защита от XSS
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // Показать модальное окно с игрой с анимацией
+    function showGameModal(game) {
+        const modal = document.getElementById('gameModal');
+        const modalContent = document.getElementById('modalContent');
+        const modalInner = modal.querySelector('div:first-child');
+        
+        modalContent.innerHTML = `
+            <div style="text-align: center;">
+                <div style="font-size: 4rem;">${game.icon}</div>
+                <h2 style="font-size: 1.8rem; margin: 0.5rem 0; color: #eef2ff;">${escapeHtml(game.title)}</h2>
+                <div style="background: #1f2b3e; display: inline-block; padding: 0.3rem 1rem; border-radius: 2rem; margin: 0.5rem 0;">
+                    🎭 ${game.genre} | 📅 ${game.year} | ⭐ ${game.rating}
+                </div>
+                <p style="margin: 1.5rem 0; line-height: 1.6; color: #b9c3e2; text-align: left; background: #0a0e1a; padding: 1rem; border-radius: 1rem;">
+                    ${escapeHtml(game.desc)}
+                </p>
+                <div style="font-size: 0.8rem; color: #7f8db0;">🆔 ID: ${game.id}</div>
+            </div>
+        `;
+        
+        modal.style.display = 'flex';
+        setTimeout(() => {
+            if (modalInner) modalInner.style.transform = 'scale(1)';
+        }, 10);
+    }
+
+    // Отрисовка карточек игр с плавной анимацией
+    function renderGames(filteredGames) {
+        const grid = document.getElementById('gamesGrid');
+        if (!grid) return;
+
+        if (filteredGames.length === 0) {
+            grid.innerHTML = `<div class="no-results">😢 Ничего не найдено...</div>`;
+            return;
+        }
+
+        let html = '';
+        for (let i = 0; i < filteredGames.length; i++) {
+            const game = filteredGames[i];
+            html += `
+                <div class="game-card" data-id="${game.id}">
+                    <div class="game-img">
+                        <span style="font-size: 3rem;">${game.icon}</span>
+                        <span style="font-size: 0.7rem; opacity: 0.7;">${game.year}</span>
+                    </div>
+                    <div class="game-info">
+                        <div class="game-title">${escapeHtml(game.title)}</div>
+                        <div class="game-genre">🎭 ${game.genre}</div>
+                        <div class="game-desc">${escapeHtml(game.desc.substring(0, 80))}${game.desc.length > 80 ? '...' : ''}</div>
+                        <div class="game-meta">
+                            <span>📅 ${game.year}</span>
+                            <span class="rating">⭐ ${game.rating}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        grid.innerHTML = html;
+
+        const cards = document.querySelectorAll('.game-card');
+        for (let i = 0; i < cards.length; i++) {
+            cards[i].addEventListener('click', function() {
+                const gameId = parseInt(this.getAttribute('data-id'));
+                let foundGame = null;
+                for (let j = 0; j < gamesDatabase.length; j++) {
+                    if (gamesDatabase[j].id === gameId) {
+                        foundGame = gamesDatabase[j];
+                        break;
+                    }
+                }
+                if (foundGame) showGameModal(foundGame);
+            });
+        }
+    }
+
+    // === ПАГИНАЦИЯ (объявляем первой) ===
+    let currentPage = 1;
+    let gamesPerPage = 24;
+    let currentFilteredGames = [];
+
+    function renderGamesWithPagination(filteredGames) {
+        currentFilteredGames = filteredGames;
+        currentPage = 1;
+        
+        const totalPages = Math.ceil(filteredGames.length / gamesPerPage);
+        const startIndex = (currentPage - 1) * gamesPerPage;
+        const endIndex = startIndex + gamesPerPage;
+        const gamesToShow = filteredGames.slice(startIndex, endIndex);
+        
+        renderGames(gamesToShow);
+        updatePaginationControls(totalPages);
+        updateStatsDisplay(filteredGames.length);
+    }
+    
+    function updatePaginationControls(totalPages) {
+        const prevBtn = document.getElementById('prevPageBtn');
+        const nextBtn = document.getElementById('nextPageBtn');
+        const pageNumbersDiv = document.getElementById('pageNumbers');
+        
+        if (!prevBtn || !nextBtn || !pageNumbersDiv) return;
+        
+        prevBtn.disabled = (currentPage === 1);
+        nextBtn.disabled = (currentPage === totalPages || totalPages === 0);
+        
+        let pagesHtml = '';
+        let startPage = Math.max(1, currentPage - 3);
+        let endPage = Math.min(totalPages, currentPage + 3);
+        
+        if (startPage > 1) {
+            pagesHtml += `<button class="page-btn" data-page="1">1</button>`;
+            if (startPage > 2) pagesHtml += `<span style="color: #7f8db0;">...</span>`;
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+            pagesHtml += `<button class="page-btn ${i === currentPage ? 'active' : ''}" data-page="${i}">${i}</button>`;
+        }
+        
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) pagesHtml += `<span style="color: #7f8db0;">...</span>`;
+            pagesHtml += `<button class="page-btn" data-page="${totalPages}">${totalPages}</button>`;
+        }
+        
+        pageNumbersDiv.innerHTML = pagesHtml;
+        
+        document.querySelectorAll('.page-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const page = parseInt(btn.getAttribute('data-page'));
+                if (!isNaN(page) && page !== currentPage) {
+                    currentPage = page;
+                    const startIndex = (currentPage - 1) * gamesPerPage;
+                    const endIndex = startIndex + gamesPerPage;
+                    const gamesToShow = currentFilteredGames.slice(startIndex, endIndex);
+                    renderGames(gamesToShow);
+                    updatePaginationControls(totalPages);
+                    document.querySelector('.games-grid').scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    }
+    
+    function updateStatsDisplay(count) {
+        const statsSpan = document.getElementById('statsDisplay');
+        if (statsSpan) {
+            const totalPages = Math.ceil(count / gamesPerPage);
+            statsSpan.innerHTML = `📊 игр: ${count} | 📄 стр. ${currentPage} из ${totalPages || 1}`;
+        }
+    }
+
+    // Переменная для хранения текущего выбранного жанра
+    let currentGenre = "all";
+
+    // Функция фильтрации игр
+    function filterGames() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+        
+        const filtered = [];
+        for (let i = 0; i < gamesDatabase.length; i++) {
+            const game = gamesDatabase[i];
+            if (currentGenre !== 'all' && game.genre !== currentGenre) continue;
+            if (searchTerm && !game.title.toLowerCase().includes(searchTerm)) continue;
+            filtered.push(game);
+        }
+        
+        renderGamesWithPagination(filtered);
+    }
+
+    // --- МОДАЛЬНОЕ ОКНО ВЫБОРА ЖАНРА ---
+    const genresList = [
+        { value: "all", label: "Все жанры", emoji: "🎲" },
+        { value: "RPG", label: "RPG", emoji: "🧙" },
+        { value: "Action", label: "Action", emoji: "⚔️" },
+        { value: "Adventure", label: "Adventure", emoji: "🗺️" },
+        { value: "Indie", label: "Indie", emoji: "🎨" },
+        { value: "Shooter", label: "Shooter", emoji: "🔫" },
+        { value: "Racing", label: "Racing", emoji: "🏎️" },
+        { value: "Puzzle", label: "Puzzle", emoji: "🧩" },
+        { value: "Arcade", label: "Arcade", emoji: "👾" },
+        { value: "Fighting", label: "Fighting", emoji: "🥊" },
+        { value: "Platformer", label: "Platformer", emoji: "🍄" },
+        { value: "Simulator", label: "Simulator", emoji: "🎮" },
+        { value: "Strategy", label: "Strategy", emoji: "♟️" },
+        { value: "Party", label: "Party", emoji: "🎉" },
+        { value: "Sports", label: "Sports", emoji: "⚽" },
+        { value: "Horror", label: "Horror", emoji: "😱" },
+        { value: "Sandbox", label: "Sandbox", emoji: "🏗️" }
+    ];
+
+    function openGenreModal() {
+        const modal = document.getElementById('genreModal');
+        const container = document.getElementById('genreOptionsList');
+        const modalInner = modal.querySelector('div:first-child');
+        
+        let buttonsHtml = '';
+        for (let i = 0; i < genresList.length; i++) {
+            const g = genresList[i];
+            const isActive = (currentGenre === g.value);
+            buttonsHtml += `
+                <button class="genre-option-btn" data-genre="${g.value}" style="
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    padding: 0.8rem 1rem;
+                    background: ${isActive ? '#2a334a' : '#1e2538'};
+                    border: 1px solid ${isActive ? '#60a5fa' : '#2d3a4e'};
+                    border-radius: 1rem;
+                    color: white;
+                    font-size: 1rem;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                ">
+                    <span style="font-size: 1.3rem;">${g.emoji}</span>
+                    <span style="flex: 1; text-align: left;">${g.label}</span>
+                    ${isActive ? '<span>✅</span>' : ''}
+                </button>
+            `;
+        }
+        
+        container.innerHTML = buttonsHtml;
+        modal.style.display = 'flex';
+        
+        setTimeout(() => {
+            if (modalInner) modalInner.style.transform = 'scale(1)';
+        }, 10);
+        
+        document.querySelectorAll('.genre-option-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const selectedGenre = this.getAttribute('data-genre');
+                currentGenre = selectedGenre;
+                
+                const selectedGenreObj = genresList.find(g => g.value === selectedGenre);
+                const openBtn = document.getElementById('openGenreBtn');
+                if (openBtn && selectedGenreObj) {
+                    if (selectedGenre === 'all') {
+                        openBtn.innerHTML = `🎲 Все жанры`;
+                    } else {
+                        openBtn.innerHTML = `${selectedGenreObj.emoji} ${selectedGenreObj.label}`;
+                    }
+                }
+                
+                filterGames();
+                closeGenreModal();
+            });
+            
+            btn.addEventListener('mouseenter', function() {
+                this.style.background = '#2a334a';
+                this.style.borderColor = '#60a5fa';
+            });
+            btn.addEventListener('mouseleave', function() {
+                const isActive = (currentGenre === this.getAttribute('data-genre'));
+                this.style.background = isActive ? '#2a334a' : '#1e2538';
+                this.style.borderColor = isActive ? '#60a5fa' : '#2d3a4e';
+            });
+        });
+    }
+
+    function closeGenreModal() {
+        const modal = document.getElementById('genreModal');
+        const modalInner = modal.querySelector('div:first-child');
+        if (modalInner) modalInner.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 150);
+    }
+
+    function closeGameModal() {
+        const modal = document.getElementById('gameModal');
+        const modalInner = modal.querySelector('div:first-child');
+        if (modalInner) modalInner.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            modal.style.display = 'none';
+            if (modalInner) modalInner.style.transform = 'scale(0.95)';
+        }, 150);
+    }
+
+    // Обработчики модалок
+    const closeBtn = document.getElementById('closeModalBtn');
+    if (closeBtn) closeBtn.addEventListener('click', closeGameModal);
+
+    const modal = document.getElementById('gameModal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) closeGameModal();
+        });
+    }
+
+    const genreModal = document.getElementById('genreModal');
+    if (genreModal) {
+        genreModal.addEventListener('click', function(e) {
+            if (e.target === this) closeGenreModal();
+        });
+    }
+
+    const closeGenreModalBtn = document.getElementById('closeGenreModal');
+    if (closeGenreModalBtn) closeGenreModalBtn.addEventListener('click', closeGenreModal);
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeGameModal();
+            closeGenreModal();
+            const quizModal = document.getElementById('quizModal');
+            if (quizModal && quizModal.style.display === 'flex') {
+                const quizInner = quizModal.querySelector('div:first-child');
+                if (quizInner) quizInner.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    quizModal.style.display = 'none';
+                }, 150);
+            }
+        }
+    });
+
+    // Подключаем поиск
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) searchInput.addEventListener('input', filterGames);
+    
+    const openGenreBtn = document.getElementById('openGenreBtn');
+    if (openGenreBtn) openGenreBtn.addEventListener('click', openGenreModal);
+
+    // Обработчики кнопок пагинации
+    const prevBtn = document.getElementById('prevPageBtn');
+    const nextBtn = document.getElementById('nextPageBtn');
+    
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                const startIndex = (currentPage - 1) * gamesPerPage;
+                const endIndex = startIndex + gamesPerPage;
+                const gamesToShow = currentFilteredGames.slice(startIndex, endIndex);
+                renderGames(gamesToShow);
+                const totalPages = Math.ceil(currentFilteredGames.length / gamesPerPage);
+                updatePaginationControls(totalPages);
+                updateStatsDisplay(currentFilteredGames.length);
+                document.querySelector('.games-grid').scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    }
+    
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+            const totalPages = Math.ceil(currentFilteredGames.length / gamesPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                const startIndex = (currentPage - 1) * gamesPerPage;
+                const endIndex = startIndex + gamesPerPage;
+                const gamesToShow = currentFilteredGames.slice(startIndex, endIndex);
+                renderGames(gamesToShow);
+                updatePaginationControls(totalPages);
+                updateStatsDisplay(currentFilteredGames.length);
+                document.querySelector('.games-grid').scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    }
+
+    // --- КВИЗ ---
+    const quizQuestions = [
+        { text: "🎮 Какой жанр вам нравится?", options: ["RPG", "Action", "Adventure", "Indie", "Shooter", "Racing", "Puzzle", "Platformer", "Strategy", "Horror", "Fighting"] },
+        { text: "⚔️ Что для вас важнее?", options: ["Сюжет", "Геймплей", "Графика", "Мультиплеер"] },
+        { text: "⏱️ Сколько времени готовы уделять?", options: ["До 10ч", "10-30ч", "30-100ч", "100+ч"] },
+        { text: "🎨 Какой стиль?", options: ["Реализм", "Фэнтези", "Фантастика", "Пиксель-арт"] },
+        { text: "🤺 Сложность?", options: ["Лёгкая", "Средняя", "Высокая", "Не важно"] }
+    ];
+
+    let currentQuestion = 0;
+    let userAnswers = [];
+
+    function showQuiz() {
+        const modal = document.getElementById('quizModal');
+        const modalInner = modal.querySelector('div:first-child');
+        modal.style.display = 'flex';
+        setTimeout(() => {
+            if (modalInner) modalInner.style.transform = 'scale(1)';
+        }, 10);
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        const q = quizQuestions[currentQuestion];
+        let optionsHtml = '';
+        for (let i = 0; i < q.options.length; i++) {
+            optionsHtml += `<button class="quiz-opt" data-val="${q.options[i]}" style="display: block; width: 100%; padding: 0.8rem; margin: 0.5rem 0; background: #1e2538; border: 1px solid #2d3a4e; border-radius: 1rem; color: white; cursor: pointer; transition: 0.2s;">${q.options[i]}</button>`;
+        }
+        
+        document.getElementById('quizContent').innerHTML = `
+            <h2>🎯 Вопрос ${currentQuestion + 1} из 5</h2>
+            <p style="margin: 1rem 0; color: #c084fc;">${q.text}</p>
+            <div>${optionsHtml}</div>
+            <div style="margin-top: 1rem; display: flex; justify-content: space-between;">
+                <button id="quizPrev" style="padding: 0.5rem 1rem; background: #2d3a4e; border: none; border-radius: 1rem; color: white; cursor: pointer; transition: 0.2s;">◀ Назад</button>
+                <button id="quizSkip" style="padding: 0.5rem 1rem; background: none; border: 1px solid #4b6e9e; border-radius: 1rem; color: #9bb5e6; cursor: pointer; transition: 0.2s;">Пропустить</button>
+            </div>
+        `;
+        
+        document.querySelectorAll('.quiz-opt').forEach(btn => {
+            btn.onclick = () => {
+                userAnswers[currentQuestion] = btn.getAttribute('data-val');
+                if (currentQuestion + 1 < quizQuestions.length) {
+                    currentQuestion++;
+                    renderQuestion();
+                } else {
+                    finishQuiz();
+                }
+            };
+            btn.addEventListener('mouseenter', function() { this.style.background = '#2a334a'; });
+            btn.addEventListener('mouseleave', function() { this.style.background = '#1e2538'; });
+        });
+        
+        const quizPrev = document.getElementById('quizPrev');
+        if (quizPrev) {
+            quizPrev.onclick = () => {
+                if (currentQuestion > 0) {
+                    currentQuestion--;
+                    renderQuestion();
+                }
+            };
+        }
+        
+        const quizSkip = document.getElementById('quizSkip');
+        if (quizSkip) {
+            quizSkip.onclick = () => closeQuiz();
+        }
+    }
+
+    function finishQuiz() {
+        const selectedGenre = userAnswers[0];
+        
+        if (!selectedGenre) {
+            closeQuiz();
+            return;
+        }
+        
+        let filteredGames = gamesDatabase.filter(game => game.genre === selectedGenre);
+        
+        if (filteredGames.length === 0) {
+            document.getElementById('quizContent').innerHTML = `
+                <h2>😢 Нет игр в жанре "${selectedGenre}"</h2>
+                <p>Попробуйте другой жанр в следующий раз!</p>
+                <button id="closeQuizBtn" style="margin-top: 1rem; padding: 0.8rem; background: #60a5fa; border: none; border-radius: 1rem; color: white; cursor: pointer; transition: 0.2s;">Закрыть</button>
+            `;
+            const closeQuizBtn = document.getElementById('closeQuizBtn');
+            if (closeQuizBtn) closeQuizBtn.onclick = () => closeQuiz();
+            return;
+        }
+        
+        filteredGames = filteredGames.sort((a, b) => {
+            let scoreA = 0, scoreB = 0;
+            
+            if (userAnswers[1] === "Сюжет" && a.genre === "RPG") scoreA += 1;
+            if (userAnswers[1] === "Сюжет" && b.genre === "RPG") scoreB += 1;
+            
+            if (userAnswers[2] === "100+ч" && a.genre !== "Indie") scoreA += 0.5;
+            if (userAnswers[2] === "100+ч" && b.genre !== "Indie") scoreB += 0.5;
+            
+            if (userAnswers[3] === "Реализм" && ["Action", "Shooter"].includes(a.genre)) scoreA += 0.5;
+            if (userAnswers[3] === "Реализм" && ["Action", "Shooter"].includes(b.genre)) scoreB += 0.5;
+            if (userAnswers[3] === "Фэнтези" && a.genre === "RPG") scoreA += 0.5;
+            if (userAnswers[3] === "Фэнтези" && b.genre === "RPG") scoreB += 0.5;
+            
+            if (userAnswers[4] === "Высокая" && a.rating >= 9.5) scoreA += 0.5;
+            if (userAnswers[4] === "Высокая" && b.rating >= 9.5) scoreB += 0.5;
+            
+            if (b.rating !== a.rating) return b.rating - a.rating;
+            return scoreB - scoreA;
+        }).slice(0, 5);
+        
+        let recHtml = `<h2>🎉 Рекомендации (жанр: ${selectedGenre})</h2><div style="max-height: 350px; overflow-y: auto;">`;
+        for (let i = 0; i < filteredGames.length; i++) {
+            recHtml += `<div style="background: #1e2538; border-radius: 1rem; padding: 0.8rem; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 1rem; transition: 0.2s;">
+                <span style="font-size: 2rem;">${filteredGames[i].icon}</span>
+                <div><div style="font-weight: bold;">${filteredGames[i].title}</div><div style="font-size: 0.8rem;">⭐ ${filteredGames[i].rating} • ${filteredGames[i].year}</div></div>
+            </div>`;
+        }
+        recHtml += '</div><button id="closeQuizBtn" style="margin-top: 1rem; width: 100%; padding: 0.8rem; background: #60a5fa; border: none; border-radius: 1rem; color: white; cursor: pointer; transition: 0.2s;">Закрыть</button>';
+        
+        document.getElementById('quizContent').innerHTML = recHtml;
+        const closeQuizBtn = document.getElementById('closeQuizBtn');
+        if (closeQuizBtn) closeQuizBtn.onclick = () => closeQuiz();
+    }
+
+    function closeQuiz() {
+        const modal = document.getElementById('quizModal');
+        const modalInner = modal.querySelector('div:first-child');
+        if (modalInner) modalInner.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            modal.style.display = 'none';
+            if (modalInner) modalInner.style.transform = 'scale(0.95)';
+        }, 150);
+        if (!localStorage.getItem('quizCompleted')) {
+            localStorage.setItem('quizCompleted', 'true');
+        }
+    }
+
+    // Показываем квиз при первом заходе
+    if (!localStorage.getItem('quizCompleted')) {
+        setTimeout(() => showQuiz(), 500);
+    }
+
+    // Кнопка перезапуска квиза
+    const restartBtn = document.getElementById('restartQuizBtn');
+    if (restartBtn) {
+        restartBtn.addEventListener('click', () => {
+            currentQuestion = 0;
+            userAnswers = [];
+            showQuiz();
+        });
+        restartBtn.addEventListener('mouseenter', function() { this.style.transform = 'scale(1.1)'; });
+        restartBtn.addEventListener('mouseleave', function() { this.style.transform = 'scale(1)'; });
+    }
+    
+    // СТАРТОВЫЙ РЕНДЕР
+    renderGamesWithPagination(gamesDatabase);
+</script>
+</body>
+</html>
